@@ -1,25 +1,64 @@
+# azure-pipelines.yml
+
 trigger:
-  branches:
-    include:
-      - main
+  - main # Esto significa que el pipeline se ejecutará cada vez que haya un cambio en la rama 'main'
 
 variables:
-  - group: MyVariableGroup  # Referencia al grupo que contiene 'mySecret'
-  - name: environmentName
-    value: 'dev'
-  - name: greeting
-    value: 'Hello from Azure DevOps!'
+  # ----------------------------------------------------
+  # 1. Variables definidas directamente en el YAML
+  #    Estas son variables de "pipeline" y son visibles en los logs
+  # ----------------------------------------------------
+  - group: MiGrupoDeVariables # El nombre debe coincidir exactamente con el que creaste  
+  MiVariableTexto: "Hola desde una variable de texto"
+  MiVariableNumero: 12345
+  MiVariableBooleana: true
 
-stages:
-- stage: TestVariablesAndSecrets
-  jobs:
-  - job: ShowVariables
-    steps:
-    - script: |
-        echo "🟢 Environment: $(environmentName)"
-        echo "🟢 Greeting: $(greeting)"
-        echo "🔒 Secret (masked): $(mySecret)"
-        echo "🔐 Secret via env var: $MY_SECRET"
-      displayName: 'Print variables and secret'
-      env:
-        MY_SECRET: $(mySecret)
+
+pool:
+  vmImage: 'ubuntu-latest' # Usa la última imagen de Ubuntu para el agente
+
+jobs:
+- job: DemostracionDeVariablesYSecretos
+  displayName: 'Demostración de Variables y Secretos'
+
+  steps:
+  - script: |
+      echo "--- Demostrando Variables Directas en YAML ---"
+      echo "MiVariableTexto: $(MiVariableTexto)"
+      echo "MiVariableNumero: $(MiVariableNumero)"
+      echo "MiVariableBooleana: $(MiVariableBooleana)"
+      echo ""
+
+      echo "--- Demostrando Variables de Entorno Predefinidas ---"
+      echo "ID de la compilación (Build.BuildId): $(Build.BuildId)"
+      echo "Número de compilación (Build.BuildNumber): $(Build.BuildNumber)"
+      echo "Nombre del agente (Agent.Name): $(Agent.Name)"
+      echo "Proyecto (System.TeamProject): $(System.TeamProject)"
+      echo ""
+
+      echo "--- Demostrando Secretos (de Grupo de Variables) ---"
+      # Para acceder a un secreto de un grupo de variables, usas $(NombreDeTuSecreto)
+      # Azure DevOps enmascarará automáticamente el valor en los logs.
+      echo "MiSecreto (mascarado): $(MiSecreto)"
+      echo ""
+    displayName: 'Ejecutar script para mostrar variables'
+
+  - task: PowerShell@2 # Otro tipo de tarea para mostrar variables
+    displayName: 'Mostrar variables en PowerShell'
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "--- Demostrando Variables Directas en YAML (PowerShell) ---"
+        Write-Host "MiVariableTexto: $env:MiVariableTexto"
+        Write-Host "MiVariableNumero: $env:MiVariableNumero"
+        Write-Host "MiVariableBooleana: $env:MiVariableBooleana"
+        Write-Host ""
+
+        Write-Host "--- Demostrando Secretos (PowerShell) ---"
+        # En PowerShell, los secretos también se acceden como variables de entorno
+        Write-Host "MiSecreto (mascarado): $env:MiSecreto"
+    env: # Es importante pasar los secretos como variables de entorno a las tareas
+      MiVariableTexto: $(MiVariableTexto)
+      MiVariableNumero: $(MiVariableNumero)
+      MiVariableBooleana: $(MiVariableBooleana)
+      MiSecreto: $(MiSecreto) # Pasa el secreto como variable de entorno
