@@ -1,81 +1,28 @@
 trigger:
-  - main # Esto significa que el pipeline se ejecutará cada vez que haya un cambio en la rama 'main'
+  branches:
+    include:
+      - main  
 
 variables:
-  # ----------------------------------------------------
-  # 1. Variables definidas directamente en el YAML
-  #    Estas son variables de "pipeline" y son visibles en los logs
-  # ----------------------------------------------------
-  MiVariableTexto: "Hola desde una variable de texto"
-  MiVariableNumero: 12345
-  MiVariableBooleana: true
+- group: MyVariableGroup
+  # Variable visible en consola
+  environmentName: 'dev'
+  greeting: 'Hello from Azure DevOps!'
 
-# ¡CORRECCIÓN AQUÍ!
-# Esta línea debe estar al mismo nivel que 'variables:'
-- group: MiGrupoDeVariables # Este era el problema, debe estar aquí, no indentado bajo 'variables:'
-# -------------------------
-  # 2. Variables de entorno de Azure Pipelines (predefinidas)
-  #    No necesitas definirlas, Azure DevOps las provee automáticamente
-  #    Las usamos para mostrar cómo acceder a ellas
-  # ----------------------------------------------------
-  # Build.BuildId: ID único de la compilación
-  # Build.BuildNumber: Número de compilación
-  # Agent.Name: Nombre del agente de compilación
-  # System.TeamProject: Nombre del proyecto
-  # ----------------------------------------------------
+  # Se puede referenciar un secreto definido en la sección de variables del pipeline
+  - name: mySecret
+    value: $(mySecret)  # Esto se referenciará desde la biblioteca de variables
 
-# ----------------------------------------------------
-# 3. Referenciar un Grupo de Variables (para secretos y variables reutilizables)
-#    Aquí es donde vinculamos nuestro grupo de variables 'MiGrupoDeVariables'
-#    que creamos en la "Library" de Azure DevOps.
-# ----------------------------------------------------
-
-
-pool:
-  vmImage: 'ubuntu-latest' # Usa la última imagen de Ubuntu para el agente
-
-jobs:
-- job: DemostracionDeVariablesYSecretos
-  displayName: 'Demostración de Variables y Secretos'
-
-  steps:
-  - script: |
-      echo "--- Demostrando Variables Directas en YAML ---"
-      echo "MiVariableTexto: $(MiVariableTexto)"
-      echo "MiVariableNumero: $(MiVariableNumero)"
-      echo "MiVariableBooleana: $(MiVariableBooleana)"
-      echo ""
-
-      echo "--- Demostrando Variables de Entorno Predefinidas ---"
-      echo "ID de la compilación (Build.BuildId): $(Build.BuildId)"
-      echo "Número de compilación (Build.BuildNumber): $(Build.BuildNumber)"
-      echo "Nombre del agente (Agent.Name): $(Agent.Name)"
-      echo "Proyecto (System.TeamProject): $(System.TeamProject)"
-      echo ""
-
-      echo "--- Demostrando Secretos (de Grupo de Variables) ---"
-      # Para acceder a un secreto de un grupo de variables, usas $(NombreDeTuSecreto)
-      # Azure DevOps enmascarará automáticamente el valor en los logs.
-      echo "MiSecreto (mascarado): $(MiSecreto)"
-      echo ""
-    displayName: 'Ejecutar script para mostrar variables'
-
-  - task: PowerShell@2 # Otro tipo de tarea para mostrar variables
-    displayName: 'Mostrar variables en PowerShell'
-    inputs:
-      targetType: 'inline'
-      script: |
-        Write-Host "--- Demostrando Variables Directas en YAML (PowerShell) ---"
-        Write-Host "MiVariableTexto: $env:MiVariableTexto"
-        Write-Host "MiVariableNumero: $env:MiVariableNumero"
-        Write-Host "MiVariableBooleana: $env:MiVariableBooleana"
-        Write-Host ""
-
-        Write-Host "--- Demostrando Secretos (PowerShell) ---"
-        # En PowerShell, los secretos también se acceden como variables de entorno
-        Write-Host "MiSecreto (mascarado): $env:MiSecreto"
-    env: # Es importante pasar los secretos como variables de entorno a las tareas
-      MiVariableTexto: $(MiVariableTexto)
-      MiVariableNumero: $(MiVariableNumero)
-      MiVariableBooleana: $(MiVariableBooleana)
-      MiSecreto: $(MiSecreto) # Pasa el secreto como variable de entorno
+stages:
+- stage: TestVariablesAndSecrets
+  jobs:
+  - job: ShowVariables
+    steps:
+    - script: |
+        echo "🟢 Environment: $(environmentName)"
+        echo "🟢 Greeting: $(greeting)"
+        echo "🔒 Secret (masked): $(mySecret)"
+        echo "🔐 Secret via env var: $MY_SECRET"
+      displayName: 'Print variables and secret'
+      env:
+        MY_SECRET: $(mySecret)
