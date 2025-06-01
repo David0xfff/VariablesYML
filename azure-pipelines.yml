@@ -11,7 +11,7 @@ variables:
   MiVariableTexto: "Hola desde una variable de texto"
   MiVariableNumero: 12345
   MiVariableBooleana: true
-  - group: MiGrupoDeVariables 
+- group: MiGrupoDeVariables 
   # ----------------------------------------------------
   # 2. Variables de entorno de Azure Pipelines (predefinidas)
   #    No necesitas definirlas, Azure DevOps las provee automáticamente
