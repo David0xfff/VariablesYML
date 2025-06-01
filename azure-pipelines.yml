@@ -11,7 +11,7 @@ variables:
   MiVariableTexto: "Hola desde una variable de texto"
   MiVariableNumero: 12345
   MiVariableBooleana: true
-
+- group: MiGrupoDeVariables 
   # ----------------------------------------------------
   # 2. Variables de entorno de Azure Pipelines (predefinidas)
   #    No necesitas definirlas, Azure DevOps las provee automáticamente
@@ -28,7 +28,7 @@ variables:
 #    Aquí es donde vinculamos nuestro grupo de variables 'MiGrupoDeVariables'
 #    que creamos en la "Library" de Azure DevOps.
 # ----------------------------------------------------
-- group: MiGrupoDeVariables # El nombre debe coincidir exactamente con el que creaste
+
 
 pool:
   vmImage: 'ubuntu-latest' # Usa la última imagen de Ubuntu para el agente
