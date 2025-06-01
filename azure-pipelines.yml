@@ -1,5 +1,3 @@
-# azure-pipelines.yml
-
 trigger:
   - main # Esto significa que el pipeline se ejecutará cada vez que haya un cambio en la rama 'main'
 
@@ -11,8 +9,11 @@ variables:
   MiVariableTexto: "Hola desde una variable de texto"
   MiVariableNumero: 12345
   MiVariableBooleana: true
-- group: MiGrupoDeVariables 
-  # ----------------------------------------------------
+
+# ¡CORRECCIÓN AQUÍ!
+# Esta línea debe estar al mismo nivel que 'variables:'
+- group: MiGrupoDeVariables # Este era el problema, debe estar aquí, no indentado bajo 'variables:'
+# -------------------------
   # 2. Variables de entorno de Azure Pipelines (predefinidas)
   #    No necesitas definirlas, Azure DevOps las provee automáticamente
   #    Las usamos para mostrar cómo acceder a ellas
